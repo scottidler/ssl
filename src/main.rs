@@ -77,51 +77,11 @@ fn fetch_certificate_from_domain(domain: &str) -> Result<String> {
         &format!("{}:443", domain),
         "-servername",
         domain,
-        "-showcerts",
+        //"-showcerts",
     ]);
     execute_command(cmd, None)
 }
 
-fn create_x509_command() -> Command {
-    let mut cmd = Command::new("openssl");
-    cmd.args(&["x509", "-noout", "-text"]).stdin(Stdio::piped());
-    cmd
-}
-/*
-fn execute_command(mut cmd: Command, input_data: Option<&str>) -> Result<String> {
-    println!("execute_command: cmd: {:?}", cmd);
-    if let Some(data) = input_data {
-        cmd.stdin(Stdio::piped());
-    }
-    cmd.stderr(Stdio::piped());
-
-    let output = if let Some(data) = input_data {
-        println!("execute_command: input_data: {}", data);
-        let mut child = cmd.spawn()?;
-        if let Some(ref mut stdin) = child.stdin {
-            stdin.write_all(data.as_bytes())?;
-        } else {
-            return Err(eyre!("Failed to open stdin"));
-        }
-        child.wait_with_output()?
-    } else {
-        println!("execute_command: no input_data");
-        cmd.output()?
-    };
-
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(eyre!(
-            "Command execution failed with status: {:?}, stderr: {}",
-            output.status,
-            stderr
-        ));
-    }
-
-    println!("execute_command: output: {:?}", output);
-    Ok(String::from_utf8_lossy(&output.stdout).to_string())
-}
-*/
 fn execute_command(mut cmd: Command, input_data: Option<&str>) -> Result<String> {
     println!("execute_command: cmd: {:?}", cmd);
     if let Some(data) = input_data {
@@ -169,16 +129,19 @@ fn inspect(input: &str) -> Result<String> {
     let result = match input_type(input)? {
         InputType::Domain(domain) => {
             let certificate_data = fetch_certificate_from_domain(&domain)?;
-            let mut x509_cmd = create_x509_command();
+            let mut x509_cmd = Command::new("openssl");
+            x509_cmd.args(&["x509", "-noout", "-text"]).stdin(Stdio::piped()).stdout(Stdio::piped());
             execute_command(x509_cmd, Some(&certificate_data))
         }
         InputType::File(file_path) => {
             let mut x509_cmd = Command::new("openssl");
-            x509_cmd.args(&["x509", "-in", &file_path, "-text", "-noout"]);
+            x509_cmd.args(&["x509", "-in", &file_path, "-text", "-noout"]).stdout(Stdio::piped());
             execute_command(x509_cmd, None)
         }
         InputType::Stdin(stdin_content) => {
-            let x509_cmd = create_x509_command();
+            //let x509_cmd = create_x509_command();
+            let mut x509_cmd = Command::new("openssl");
+            x509_cmd.args(&["x509", "-noout", "-text"]).stdin(Stdio::piped()).stdout(Stdio::piped());
             execute_command(x509_cmd, Some(&stdin_content))
         }
     };
