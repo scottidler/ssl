@@ -90,7 +90,7 @@ fn execute_command(mut cmd: Command, input_data: Option<&str>) -> Result<String>
     cmd.stderr(Stdio::piped());
 
     let output = if let Some(data) = input_data {
-        println!("execute_command: input_data: {}", data);
+        //println!("execute_command: input_data: {}", data);
         let mut child = cmd.spawn()?;
         if let Some(ref mut stdin) = child.stdin.take() {
             stdin.write_all(data.as_bytes())?;
@@ -130,18 +130,26 @@ fn inspect(input: &str) -> Result<String> {
         InputType::Domain(domain) => {
             let certificate_data = fetch_certificate_from_domain(&domain)?;
             let mut x509_cmd = Command::new("openssl");
-            x509_cmd.args(&["x509", "-noout", "-text"]).stdin(Stdio::piped()).stdout(Stdio::piped());
+            x509_cmd
+                .args(&["x509", "-noout", "-text"])
+                .stdin(Stdio::piped())
+                .stdout(Stdio::piped());
             execute_command(x509_cmd, Some(&certificate_data))
         }
         InputType::File(file_path) => {
             let mut x509_cmd = Command::new("openssl");
-            x509_cmd.args(&["x509", "-in", &file_path, "-text", "-noout"]).stdout(Stdio::piped());
+            x509_cmd
+                .args(&["x509", "-in", &file_path, "-text", "-noout"])
+                .stdout(Stdio::piped());
             execute_command(x509_cmd, None)
         }
         InputType::Stdin(stdin_content) => {
             //let x509_cmd = create_x509_command();
             let mut x509_cmd = Command::new("openssl");
-            x509_cmd.args(&["x509", "-noout", "-text"]).stdin(Stdio::piped()).stdout(Stdio::piped());
+            x509_cmd
+                .args(&["x509", "-noout", "-text"])
+                .stdin(Stdio::piped())
+                .stdout(Stdio::piped());
             execute_command(x509_cmd, Some(&stdin_content))
         }
     };
