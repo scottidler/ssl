@@ -9,7 +9,7 @@ use std::path::Path;
 use std::process::{Command, Stdio};
 
 #[derive(Parser, Debug)]
-#[clap(author, version, about, long_about = None)]
+#[clap(author, version = env!("GIT_DESCRIBE"), about, long_about = None)]
 struct Cli {
     #[clap(subcommand)]
     command: Commands,
