@@ -71,7 +71,7 @@ fn input_type(input: &str) -> Result<InputType> {
 
 fn fetch_certificate_from_domain(domain: &str) -> Result<String> {
     let mut cmd = Command::new("openssl");
-    cmd.args(&[
+    cmd.args([
         "s_client",
         "-connect",
         &format!("{}:443", domain),
@@ -131,7 +131,7 @@ fn inspect(input: &str) -> Result<String> {
             let certificate_data = fetch_certificate_from_domain(&domain)?;
             let mut x509_cmd = Command::new("openssl");
             x509_cmd
-                .args(&["x509", "-noout", "-text"])
+                .args(["x509", "-noout", "-text"])
                 .stdin(Stdio::piped())
                 .stdout(Stdio::piped());
             execute_command(x509_cmd, Some(&certificate_data))
@@ -139,7 +139,7 @@ fn inspect(input: &str) -> Result<String> {
         InputType::File(file_path) => {
             let mut x509_cmd = Command::new("openssl");
             x509_cmd
-                .args(&["x509", "-in", &file_path, "-text", "-noout"])
+                .args(["x509", "-in", &file_path, "-text", "-noout"])
                 .stdout(Stdio::piped());
             execute_command(x509_cmd, None)
         }
@@ -147,7 +147,7 @@ fn inspect(input: &str) -> Result<String> {
             //let x509_cmd = create_x509_command();
             let mut x509_cmd = Command::new("openssl");
             x509_cmd
-                .args(&["x509", "-noout", "-text"])
+                .args(["x509", "-noout", "-text"])
                 .stdin(Stdio::piped())
                 .stdout(Stdio::piped());
             execute_command(x509_cmd, Some(&stdin_content))
